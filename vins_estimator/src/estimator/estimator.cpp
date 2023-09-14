@@ -1232,9 +1232,10 @@ void Estimator::optimization()
                 cout << "valid cnt: " << valid_points << endl;
             }
 
+            //ANN opt
             for(int i = 0; i < WINDOW_SIZE + 1; i++)
             {
-                if(valid_3d_points[i].size() > 10 && new_flag)
+                if(valid_3d_points[i].size() > 12 && new_flag)
                 {
                     Dim in = {3, 5}; //first layer: 8 input neurons and 5 neurons in the hidden layer
                     Dim out = {5, 2}; //second layer: 5 neurons in the hidden layer and 1 output neuron
