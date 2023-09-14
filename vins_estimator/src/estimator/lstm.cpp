@@ -639,7 +639,7 @@ void Lstm::train(vector<DataType*> trainSet, vector<DataType*> labelSet, int epo
     if(verification>0 && verification<0.5){
         _verification = verification;
     }else{
-        cout<<"verification rate is invalid."<<endl;
+        // cout<<"verification rate is invalid."<<endl;
     }
 
 	double lastTrainRmse = 0.0;
@@ -655,11 +655,11 @@ void Lstm::train(vector<DataType*> trainSet, vector<DataType*> labelSet, int epo
         }
         verificationAvg /= verLen;
         verificationAvg = verificationAvg<0?-verificationAvg:verificationAvg;
-        cout<<"---------------avg="<<verificationAvg<<endl;
+        // cout<<"---------------avg="<<verificationAvg<<endl;
     }
 
     Deltas *deltaSet = new Deltas(_inNodeNum, _hideNodeNum, _outNodeNum);
-    cout<<"deltaset inited. start trainning."<<endl;
+    // cout<<"deltaset inited. start trainning."<<endl;
 	FOR(e, epoche){	
 		//每次epoche清除单元状态
 		resetStates();
@@ -677,7 +677,7 @@ void Lstm::train(vector<DataType*> trainSet, vector<DataType*> labelSet, int epo
 		double verRmse = verificationLoss(trainSet, labelSet);
 		// cout<<"epoche:"<<e<<"|rmse:"<<trainRmse<<endl;
 		if(e>0 && abs(trainRmse-lastTrainRmse) < stopThreshold){//变化足够小
-			cout<<"train rmse got tiny diff, stop in epoche:"<<e<<endl;
+			// cout<<"train rmse got tiny diff, stop in epoche:"<<e<<endl;
 			break;
 		}
 

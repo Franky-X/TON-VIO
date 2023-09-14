@@ -1087,6 +1087,17 @@ void Estimator::optimization()
     vector<Vector3d> valid_3d_points[(WINDOW_SIZE + 1)];
     vector<Vector2d> valid_2d_velocity[(WINDOW_SIZE + 1)];
     vector<Vector3d> new_3d_points[(WINDOW_SIZE + 1)];
+    int pre_start_frame = -10;
+    
+
+    Dim in = {3, 5}; //first layer: 8 input neurons and 5 neurons in the hidden layer
+    Dim out = {5, 2}; //second layer: 5 neurons in the hidden layer and 1 output neuron
+    NeuralNet *ann = create_net(in, out); //initialize a 8-5-1 neural network
+    add_hidden_layer(ann, 20); //add another hidden layer
+    add_hidden_layer(ann, 10); //add another hidden layer
+    add_hidden_layer(ann, 10); //add another hidden layer
+    add_hidden_layer(ann, 5); //add another hidden layer
+            
 
     for (auto &it_per_id : f_manager.feature)
     {
@@ -1117,7 +1128,8 @@ void Estimator::optimization()
             int new_flag = 0;
             if(it_per_id.feature_per_frame[0].velocity.norm() == 0)
             {
-                cout << "new_points: "  << ++new_points << std::endl;
+                ++new_points;
+                // cout << "new_points: "  << ++new_points << std::endl;
                 // continue;
                 // Vector2d k1 = (it_per_id.feature_per_frame[2].velocity - it_per_id.feature_per_frame[1].velocity);
                 // Vector2d k2 = (it_per_id.feature_per_frame[3].velocity - it_per_id.feature_per_frame[2].velocity);
@@ -1168,8 +1180,8 @@ void Estimator::optimization()
                     Lstm *lstm = new Lstm(2,2,2);
 
                     //投入训练
-                    cout<<"/***Learnning***/"<<endl;
-                    lstm->train(trainSet, labelSet, 1000, 0, 1e-8);
+                    cout<<"/***LSTM***/"<<endl;
+                    lstm->train(trainSet, labelSet, 1000, 0, 1e-5);
                     double diff = 0;
                     for(int i = 1; i <  it_per_id.endFrame() - it_per_id.start_frame; i++)
                     {
@@ -1184,12 +1196,17 @@ void Estimator::optimization()
                         // it_per_id.feature_per_frame[it_per_id.endFrame() - it_per_id.start_frame - i - 1].velocity = Vector2d(z[0]* (vx_max - vx_min),z[1] * (vy_max - vy_min));
                         if(it_per_id.endFrame() - it_per_id.start_frame - i - 1 == 1)
                             diff = abs(z[0]-label[0]) / abs(label[0]) + abs(z[1]-label[1]) / abs(label[1]);
-                        if(it_per_id.endFrame() - it_per_id.start_frame - i - 1 == 0 && diff < 0.5)
+                        if(it_per_id.endFrame() - it_per_id.start_frame - i - 1 == 0 && diff < 0.055)
                         {
                             it_per_id.feature_per_frame[0].velocity = Vector2d(z[0]* (vx_max - vx_min) + vx_min,z[1] * (vy_max - vy_min) + vy_min);
                             cout << "pre_valid_points: "  << ++predict_points << std::endl;
                             if(it_per_id.feature_per_frame[0].velocityRight.norm() == 0)
                                 it_per_id.feature_per_frame[0].velocityRight = Vector2d(z[0]* (vx_max - vx_min) + vx_min,z[1] * (vy_max - vy_min) + vy_min);
+                        }
+                        else{
+                            new_3d_points[it_per_id.start_frame].push_back(Vector3d(it_per_id.feature_per_frame[0].uv.x(),it_per_id.feature_per_frame[0].uv.y(),it_per_id.estimated_depth));
+                            // cout << "frame " << it_per_id.start_frame << " new_cnt " << new_3d_points[it_per_id.start_frame].size() << endl;
+                            new_flag = 1;
                         }
                         free(z);
                         free(test);
@@ -1207,8 +1224,9 @@ void Estimator::optimization()
                     // cout << "short track cnt: " << it_per_id.endFrame() - it_per_id.start_frame << endl;
                     // cout << "start frame: " << it_per_id.start_frame << endl;
                     // cout << it_per_id.estimated_depth << " " << it_per_id.feature_per_frame[0].uv.transpose() << endl;
+             
                     new_3d_points[it_per_id.start_frame].push_back(Vector3d(it_per_id.feature_per_frame[0].uv.x(),it_per_id.feature_per_frame[0].uv.y(),it_per_id.estimated_depth));
-                    cout << "frame " << it_per_id.start_frame << " new_cnt " << new_3d_points[it_per_id.start_frame].size() << endl;
+                    // cout << "frame " << it_per_id.start_frame << " new_cnt " << new_3d_points[it_per_id.start_frame].size() << endl;
                     new_flag = 1;
                     // for(int i = 1; i <  it_per_id.endFrame() - it_per_id.start_frame; i++)
                     // {
@@ -1226,23 +1244,27 @@ void Estimator::optimization()
             }
             else{
                 valid_points++;
-                valid_3d_points[it_per_id.start_frame].push_back(Vector3d(it_per_id.feature_per_frame[0].uv.x(),it_per_id.feature_per_frame[0].uv.y(),it_per_id.estimated_depth));
-                valid_2d_velocity[it_per_id.start_frame].push_back(it_per_id.feature_per_frame[0].velocity);
-                cout << "frame " << it_per_id.start_frame << " valid_cnt " << valid_3d_points[it_per_id.start_frame].size() << endl;
-                cout << "valid cnt: " << valid_points << endl;
+                if(it_per_id.estimated_depth < 50 && it_per_id.estimated_depth > 5)
+                {
+                    valid_3d_points[it_per_id.start_frame].push_back(Vector3d(it_per_id.feature_per_frame[0].uv.x(),it_per_id.feature_per_frame[0].uv.y(),it_per_id.estimated_depth));
+                    valid_2d_velocity[it_per_id.start_frame].push_back(it_per_id.feature_per_frame[0].velocity);
+                }
+                // cout << "frame " << it_per_id.start_frame << " valid_cnt " << valid_3d_points[it_per_id.start_frame].size() << endl;
+                // cout << "valid cnt: " << valid_points << endl;
             }
 
             //ANN opt
-            for(int i = 0; i < WINDOW_SIZE + 1; i++)
-            {
-                if(valid_3d_points[i].size() > 12 && new_flag)
+            // for(int i = 0; i < WINDOW_SIZE + 1; i++)
+            // {
+                if(valid_3d_points[it_per_id.start_frame].size() > 35 && new_flag)
                 {
+                    pre_start_frame = it_per_id.start_frame;
                     Dim in = {3, 5}; //first layer: 8 input neurons and 5 neurons in the hidden layer
                     Dim out = {5, 2}; //second layer: 5 neurons in the hidden layer and 1 output neuron
-                    int n_epoch = 1000; //number of learning epochs
+                    int n_epoch = 1500; //number of learning epochs
                     // float eta = 0.01; //learnig rate
-                    Dim train_dim = {valid_3d_points[i].size(), 3}; //training data dimension
-                    Dim test_dim = {new_3d_points[i].size(), 3}; //testing_data dimension
+                    Dim train_dim = {valid_3d_points[it_per_id.start_frame].size(), 3}; //training data dimension
+                    Dim test_dim = {new_3d_points[it_per_id.start_frame].size(), 3}; //testing_data dimension
                     // Dim all_dim = {valid_3d_points[i].size() + new_3d_points[i].size(), 3};  //testing_data dimension
                     // float **all_train = allocate_float_2d(all_dim.h, all_dim.w);
                     float **X_train = allocate_float_2d(train_dim.h, train_dim.w);
@@ -1251,19 +1273,19 @@ void Estimator::optimization()
                     float *J, *acc;
                     J = allocate_float_1d(n_epoch);
                     acc = allocate_float_1d(n_epoch);
-                    for (int j = 0; j < valid_3d_points[i].size(); j++)
+                    for (int j = 0; j < valid_3d_points[it_per_id.start_frame].size(); j++)
                     {
-                        X_train[j][0] = (float)valid_3d_points[i][j].x();
-                        X_train[j][1] = (float)valid_3d_points[i][j].y();
-                        X_train[j][2] = (float)valid_3d_points[i][j].z();
-                        y_train[j][0] = (float)valid_2d_velocity[i][j].x();
-                        y_train[j][1] = (float)valid_2d_velocity[i][j].y();
+                        X_train[j][0] = (float)valid_3d_points[it_per_id.start_frame][j].x();
+                        X_train[j][1] = (float)valid_3d_points[it_per_id.start_frame][j].y();
+                        X_train[j][2] = (float)valid_3d_points[it_per_id.start_frame][j].z();
+                        y_train[j][0] = (float)valid_2d_velocity[it_per_id.start_frame][j].x();
+                        y_train[j][1] = (float)valid_2d_velocity[it_per_id.start_frame][j].y();
                     }
-                    for (int j = 0; j < new_3d_points[i].size(); j++)
+                    for (int j = 0; j < new_3d_points[it_per_id.start_frame].size(); j++)
                     {
-                        X_test[j][0] = (float)new_3d_points[i][j].x();
-                        X_test[j][1] = (float)new_3d_points[i][j].y();
-                        X_test[j][2] = (float)new_3d_points[i][j].z();
+                        X_test[j][0] = (float)new_3d_points[it_per_id.start_frame][j].x();
+                        X_test[j][1] = (float)new_3d_points[it_per_id.start_frame][j].y();
+                        X_test[j][2] = (float)new_3d_points[it_per_id.start_frame][j].z();
                     }
                     float* X_train_min, *X_train_max;
                     float* y_train_min, *y_train_max;
@@ -1277,13 +1299,21 @@ void Estimator::optimization()
                     // cout << "##############################" << endl;
                     minmax_scaler(y_train,train_dim, y_train_min, y_train_max);
                     /* creating the neural net */
-                    NeuralNet *ann = create_net(in, out); //initialize a 8-5-1 neural network
-                    add_hidden_layer(ann, 10); //add another hidden layer
-                    add_hidden_layer(ann, 10); //add another hidden layer
-                    add_hidden_layer(ann, 10); //add another hidden layer
-                    add_hidden_layer(ann, 5); //add another hidden layer
-                    train_net(ann, X_train, y_train, J, acc, train_dim, n_epoch);
-                    for(int k = 0; k < test_dim.h - 1; ++k)
+                    // NeuralNet *ann = create_net(in, out); //initialize a 8-5-1 neural network
+                    // add_hidden_layer(ann, 20); //add another hidden layer
+                    // add_hidden_layer(ann, 10); //add another hidden layer
+                    // add_hidden_layer(ann, 10); //add another hidden layer
+                    // add_hidden_layer(ann, 5); //add another hidden layer
+                    cout << "#############" <<pre_start_frame << " " << it_per_id.start_frame << endl;
+                    // if(pre_start_frame != it_per_id.start_frame)
+                    {
+                        cout << "########MLP#########" << endl;
+                        free_net(ann);
+                        ann = create_net(in, out);   
+                        train_net(ann, X_train, y_train, J, acc, train_dim, n_epoch);
+                        pre_start_frame = it_per_id.start_frame;
+                    }
+                    for(int k = 0; k < test_dim.h; ++k)
                     {
                         X_test[k][0] =  (X_test[k][0] - X_train_min[0]) / (X_train_max[0] - X_train_min[0]);
                         X_test[k][1] =  (X_test[k][1] - X_train_min[1]) / (X_train_max[1] - X_train_min[1]);
@@ -1295,7 +1325,6 @@ void Estimator::optimization()
                         new_flag = 0;
                         new_3d_points[it_per_id.start_frame].clear();
                     }
-                    free_net(ann);
                     free_float_1d(acc);
                     free_float_2d(X_train, train_dim.h);
                     // free_float_2d(all_train, all_dim.h);
@@ -1307,7 +1336,7 @@ void Estimator::optimization()
                     free_float_1d(y_train_min);
                     free_float_2d(X_test, test_dim.h);
                     
-                }
+                // }
                 // Dim in = {3, 5}; //first layer: 8 input neurons and 5 neurons in the hidden layer
                 // Dim out = {5, 2}; //second layer: 5 neurons in the hidden layer and 1 output neuron
                 // /* defining dataset */
@@ -1323,6 +1352,7 @@ void Estimator::optimization()
                 // NeuralNet *ann = create_net(in, out); //initialize a 8-5-1 neural network
                 // add_hidden_layer(ann, 5); //add another hidden layer
             }
+            new_3d_points[it_per_id.start_frame].clear();
         }
 
         
