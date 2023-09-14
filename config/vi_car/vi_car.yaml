@@ -1,0 +1,82 @@
+%YAML:1.0
+
+#common parameters
+#support: 1 imu 1 cam; 1 imu 2 cam: 2 cam; 
+imu: 1        
+num_of_cam: 2
+
+imu_topic: "/imu/data"
+#"/imu0"
+image0_topic: "/zed2/camera/left/image_raw"
+image1_topic: "/zed2/camera/right/image_raw"
+output_path: "/home/wws/catkin/src/result"
+
+cam0_calib: "cam0_pinhole.yaml"
+cam1_calib: "cam1_pinhole.yaml"
+image_width: 672
+image_height: 376
+   
+
+# Extrinsic parameter between IMU and Camera.
+estimate_extrinsic: 0 # 0  Have an accurate extrinsic parameters. We will trust the following imu^R_cam, imu^T_cam, don't change it.
+                        # 1  Have an initial guess about extrinsic parameters. We will optimize around your initial guess.
+# estimate_extrinsic: 0
+# If you don't know anything about the camera-IMU transformation, 
+# just ignore the extrinsic parameters and set the estimate_extrinsic to 2,and rotate your device set at the beginning for a few seconds
+body_T_cam0: !!opencv-matrix
+   rows: 4
+   cols: 4
+   dt: d
+   data:   [ 9.9885234402635936e-01, 1.3591158885981787e-03,
+       4.7876378696062108e-02, -8.4994249456545504e-02,
+       -4.7864188349269129e-02, -7.9091258538426246e-03,
+       9.9882253939420773e-01, 6.6169337079143220e-01,
+       1.7361758877140372e-03, -9.9996779874765440e-01,
+       -7.8349959194297103e-03, -3.0104266183335913e+00, 0., 0., 0., 1. ]
+
+
+body_T_cam1: !!opencv-matrix
+   rows: 4
+   cols: 4
+   dt: d
+   data:  [ 9.9872871452749812e-01, 1.5287637777597791e-03,
+       5.0384696680271013e-02, 7.5332297629590136e-02,
+       -5.0367177375936031e-02, -9.8967686259809895e-03,
+       9.9868173179143760e-01, 6.8331281093016005e-01,
+       2.0253941424080261e-03, -9.9994985716888607e-01,
+       -9.8071874914416046e-03, -3.0079627649520204e+00, 0., 0., 0., 1. ]
+#Multiple thread support
+multiple_thread: 1
+
+#feature traker paprameters
+max_cnt: 150            # max feature number in feature tracking
+min_dist: 30            # min distance between two features 30
+freq: 10                # frequence (Hz) of publish tracking result. At least 10Hz for good estimation. If set 0, the frequence will be same as raw image 
+F_threshold: 1.0        # ransac threshold (pixel)
+show_track: 1           # publish tracking image as topic
+flow_back: 1            # perform forward and backward optical flow to improve feature tracking accuracy
+
+#optimization parameters
+max_solver_time: 100  # max solver itration time (ms), to guarantee real time 0.04
+max_num_iterations: 20   # max solver itrations, to guarantee real time 8 
+keyframe_parallax: 10.0 # keyframe selection threshold (pixel)
+
+#imu parameters       The more accurate parameters you provide, the better performance
+acc_n: 0.1          # accelerometer measurement noise standard deviation. 
+gyr_n: 0.01         # gyroscope measurement noise standard deviation.     
+acc_w: 0.001        # accelerometer bias random work noise standard deviation.  
+gyr_w: 0.0001       # gyroscope bias random work noise standard deviation.     
+g_norm: 9.81007     # gravity magnitude
+
+#unsynchronization parameters
+estimate_td: 1                 # online estimate time offset between camera and imu
+weight_td: 1
+td: 0.0                # initial value of time offset. unit: s. readed image clock + td = real image clock (IMU clock)
+
+#loop closure parameters
+load_previous_pose_graph: 0        # load and reuse previous pose graph; load from 'pose_graph_save_path'
+pose_graph_save_path: "/home/wws/" # save and load path
+save_image: 1                   # save image in pose graph for visualization prupose; you can close this function by setting 0 
+
+
+# rosrun camera_calibration cameracalibrator.py --size 4x3 --square 0.07 image:=/camera/image_raw camera:=/camera
