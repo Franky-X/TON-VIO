@@ -192,7 +192,7 @@ void pubOdometry(const Estimator &estimator, const std_msgs::Header &header)
         foutC_td.setf(ios::fixed, ios::floatfield);
         foutC_td << truetime <<" ";
         foutC_td << estimator.td <<  endl;
-        foutC.close();
+        foutC_td.close();
     }
 }
 
