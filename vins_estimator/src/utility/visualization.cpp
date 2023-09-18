@@ -186,6 +186,13 @@ void pubOdometry(const Estimator &estimator, const std_msgs::Header &header)
               << tmp_Q.z() << " "
               << tmp_Q.w() << endl;
         foutC.close();
+
+        // double truetime = header.stamp.toSec();
+        ofstream foutC_td("/home/frankxcr/VINS-Fusion_ws/td_est.csv", ios::app);
+        foutC_td.setf(ios::fixed, ios::floatfield);
+        foutC_td << truetime <<" ";
+        foutC_td << estimator.td <<  endl;
+        foutC.close();
     }
 }
 
