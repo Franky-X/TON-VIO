@@ -34,6 +34,7 @@
 #include "../factor/projectionTwoFrameOneCamFactor.h"
 #include "../factor/projectionTwoFrameTwoCamFactor.h"
 #include "../factor/projectionOneFrameTwoCamFactor.h"
+#include "../factor/td_factor.h"
 #include "../featureTracker/feature_tracker.h"
 
 // #include "LSTM.h"

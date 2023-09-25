@@ -1435,6 +1435,9 @@ void Estimator::optimization()
         }
     }
     window_index++;
+    double init_td = para_Td[0][0];
+    TdFactor *f_td_lstm = new TdFactor(init_td, init_td - 0.0);
+    problem.AddResidualBlock(f_td_lstm, loss_function, para_Td[0]);
 
     ROS_DEBUG("visual measurement count: %d", f_m_cnt);
     //printf("prepare for ceres: %f \n", t_prepare.toc());
