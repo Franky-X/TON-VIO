@@ -44,6 +44,8 @@ void Estimator::clearState()
 
     prevTime = -1;
     curTime = 0;
+    td_buf.clear();
+    pre_td = 0;
     openExEstimation = 0;
     initP = Eigen::Vector3d(0, 0, 0);
     initR = Eigen::Matrix3d::Identity();
@@ -1435,10 +1437,71 @@ void Estimator::optimization()
         }
     }
     window_index++;
-    double init_td = para_Td[0][0];
-    TdFactor *f_td_lstm = new TdFactor(init_td, init_td - 0.0);
-    problem.AddResidualBlock(f_td_lstm, loss_function, para_Td[0]);
+    if(WEIGHT_TD && td_flag)
+    {
+        double init_td = para_Td[0][0] /*- pre_td */;
+        // double init_td_val = para_Td[0][0];
+        td_buf.push_back(init_td);
 
+        if(td_buf.size() > 4)
+        {
+            vector<double *> trainSet;
+            vector<double *> labelSet;
+    
+            double *input=(double*)malloc(sizeof(double)*1);
+            double *label=(double*)malloc(sizeof(double)*1);
+            double td_max = -100;
+            double td_min = 100;
+
+            for(int i = 0; i < td_buf.size(); i++)
+            {
+                if(td_max < td_buf[i])
+                    td_max = td_buf[i];
+                if(td_min > td_buf[i])
+                    td_min = td_buf[i];
+            }
+
+            for(int i = 0; i < td_buf.size() - 1; i++)
+            {
+                input[0] = (td_buf[i] - td_min) / (td_max - td_min);
+                    
+                label[0] = (td_buf[i + 1] - td_min) / (td_max - td_min);
+                            
+                trainSet.push_back(input);
+                labelSet.push_back(label);
+            }
+
+
+            Lstm *lstm = new Lstm(1,2,1);
+
+            //投入训练
+            cout<<"/***LSTM***/"<<endl;
+            lstm->train(trainSet, labelSet, 1000, 0.0, 1.0e-8);
+
+            double predicted_td;
+            for(int i = 0; i < td_buf.size(); i++)
+            {
+                double *test=(double*)malloc(sizeof(double)*1);
+                test[0] = (td_buf[i] - td_min) / (td_max - td_min);
+                // label[0] = (td_buf[i + 1] - td_min) / (td_max - td_min);       
+                double *z=lstm->predict(test);
+                if(i == td_buf.size() - 1)
+                {
+                    predicted_td = z[0]* (td_max - td_min) + td_min;
+                }
+                free(z);
+                free(test);
+            }
+            pre_td = para_Td[0][0];
+            if(td_buf.size() > 4)
+                td_buf.erase(td_buf.begin());
+            TdFactor *f_td_lstm = new TdFactor(init_td, /*init_td_val*/ + predicted_td);
+            problem.AddResidualBlock(f_td_lstm, loss_function, para_Td[0]);
+
+            trainSet.clear();
+            labelSet.clear();
+        }
+    }
     ROS_DEBUG("visual measurement count: %d", f_m_cnt);
     //printf("prepare for ceres: %f \n", t_prepare.toc());
 

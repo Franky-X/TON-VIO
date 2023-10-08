@@ -26,6 +26,7 @@ int NUM_ITERATIONS;
 int ESTIMATE_EXTRINSIC;
 int ESTIMATE_TD;
 int WEIGHT_TD;
+int TD_COV;
 int ROLLING_SHUTTER;
 std::string EX_CALIB_RESULT_PATH;
 std::string VINS_RESULT_PATH;
@@ -182,6 +183,7 @@ void readParameters(std::string config_file)
     TD = fsSettings["td"];
     ESTIMATE_TD = fsSettings["estimate_td"];
     WEIGHT_TD = fsSettings["weight_td"];
+    TD_COV = fsSettings["td_cov"];
     if (ESTIMATE_TD)
         ROS_INFO_STREAM("Unsynchronized sensors, online estimate time offset, initial td: " << TD);
     else

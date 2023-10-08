@@ -178,4 +178,7 @@ class Estimator
 
     bool initFirstPoseFlag;
     bool initThreadFlag;
+
+    vector<double> td_buf;
+    double pre_td;
 };

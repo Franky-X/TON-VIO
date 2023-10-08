@@ -47,6 +47,7 @@ extern std::string IMU_TOPIC;
 extern double TD;
 extern int ESTIMATE_TD;
 extern int WEIGHT_TD;
+extern int TD_COV;
 extern int ROLLING_SHUTTER;
 extern int ROW, COL;
 extern int NUM_OF_CAM;

@@ -25,7 +25,7 @@ TdFactor::TdFactor(const double &_td, const double &_td_lstm) : td(_td) , td_lst
 //     tangent_base.block<1, 3>(0, 0) = b1.transpose();
 //     tangent_base.block<1, 3>(1, 0) = b2.transpose();
 // #endif
-    sqrt_info = 5.0e5; //important
+    sqrt_info = TD_COV; //important
 };
 
 bool TdFactor::Evaluate(double const *const *parameters, double *residuals, double **jacobians) const
