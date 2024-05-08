@@ -157,6 +157,7 @@ void train_net(NeuralNet *ann, float **X, float **y, float *J, float *acc, Dim d
     float *delta_second_layer = allocate_float_1d(ann->output->dim.h);
     clock_t start, end;
     start = clock();
+    float lr = 2;
 
     for (int step = 0; step < n_epoch; ++step) {
         float sum_err = 0;
@@ -177,13 +178,13 @@ void train_net(NeuralNet *ann, float **X, float **y, float *J, float *acc, Dim d
 
             for (int j = 0; j < ann->output->dim.h; ++j) {
                 for (int k = 0; k < ann->output->dim.w; ++k) {
-                    ann->output->weights[j][k] += delta_last_layer * ann->input->out[j];
+                    ann->output->weights[j][k] += delta_last_layer * ann->input->out[j] * lr;
                 }
             }
 
             for (int j = 0; j < ann->input->dim.h; ++j) {
                 for (int k = 0; k < ann->input->dim.w; ++k) {
-                    ann->input->weights[j][k] += X[i][j] * delta_second_layer[k];
+                    ann->input->weights[j][k] += X[i][j] * delta_second_layer[k] * lr;
                 }
             }
 

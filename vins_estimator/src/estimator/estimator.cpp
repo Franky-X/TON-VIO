@@ -1092,13 +1092,13 @@ void Estimator::optimization()
     int pre_start_frame = -10;
     
 
-    Dim in = {3, 5}; //first layer: 8 input neurons and 5 neurons in the hidden layer
-    Dim out = {5, 2}; //second layer: 5 neurons in the hidden layer and 1 output neuron
+    Dim in = {3, 4}; //first layer: 8 input neurons and 5 neurons in the hidden layer
+    Dim out = {4, 2}; //second layer: 5 neurons in the hidden layer and 1 output neuron
     NeuralNet *ann = create_net(in, out); //initialize a 8-5-1 neural network
-    add_hidden_layer(ann, 20); //add another hidden layer
-    add_hidden_layer(ann, 10); //add another hidden layer
-    add_hidden_layer(ann, 10); //add another hidden layer
-    add_hidden_layer(ann, 5); //add another hidden layer
+    // add_hidden_layer(ann, 20); //add another hidden layer
+    // add_hidden_layer(ann, 10); //add another hidden layer
+    // add_hidden_layer(ann, 10); //add another hidden layer
+    // add_hidden_layer(ann, 4); //add another hidden layer
             
 
     for (auto &it_per_id : f_manager.feature)
@@ -1264,9 +1264,9 @@ void Estimator::optimization()
                 if(valid_3d_points[it_per_id.start_frame].size() > 35 && new_flag)
                 {
                     pre_start_frame = it_per_id.start_frame;
-                    Dim in = {3, 5}; //first layer: 8 input neurons and 5 neurons in the hidden layer
-                    Dim out = {5, 2}; //second layer: 5 neurons in the hidden layer and 1 output neuron
-                    int n_epoch = 1500; //number of learning epochs
+                    Dim in = {3, 4}; //first layer: 8 input neurons and 5 neurons in the hidden layer
+                    Dim out = {4, 2}; //second layer: 5 neurons in the hidden layer and 1 output neuron
+                    int n_epoch = 251; //number of learning epochs
                     // float eta = 0.01; //learnig rate
                     Dim train_dim = {valid_3d_points[it_per_id.start_frame].size(), 3}; //training data dimension
                     Dim test_dim = {new_3d_points[it_per_id.start_frame].size(), 3}; //testing_data dimension
