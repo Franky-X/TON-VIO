@@ -86,6 +86,7 @@ void sync_process()
                 if(time0 < time1 - 0.003)
                 {
                     img0_buf.pop();
+                    cout << abs(time0-time1);
                     printf("throw img0\n");
                 }
                 else if(time0 > time1 + 0.003)

@@ -3,46 +3,51 @@
 #common parameters
 #support: 1 imu 1 cam; 1 imu 2 cam: 2 cam; 
 imu: 1         
-num_of_cam: 1  
+num_of_cam: 2  
 
-imu_topic: "/imu0"
-image0_topic: "/cam0/image_raw"
-image1_topic: "/cam1/image_raw"
-output_path: "~/output/"
+imu_topic: "/imu/data"
+image0_topic: "/HKRCams/Cam0"
+image1_topic: "/HKRCams/Cam1"
+output_path: "~/output"
 
-cam0_calib: "cam0_mei.yaml"
-cam1_calib: "cam1_mei.yaml"
-image_width: 752
-image_height: 480
+cam0_calib: "cam0_pinhole.yaml"
+cam1_calib: "cam1_pinhole.yaml"
+image_width: 1280
+image_height: 1024
    
 
 # Extrinsic parameter between IMU and Camera.
 estimate_extrinsic: 0   # 0  Have an accurate extrinsic parameters. We will trust the following imu^R_cam, imu^T_cam, don't change it.
                         # 1  Have an initial guess about extrinsic parameters. We will optimize around your initial guess.
 
+# [  0.9244512,  0.1766207,  0.3379275;
+#    0.3787647, -0.3233282, -0.8671771;
+#   -0.0438999,  0.9296580, -0.3657989 ]
+
 body_T_cam0: !!opencv-matrix
    rows: 4
    cols: 4
    dt: d
-   data: [0.0148655429818, -0.999880929698, 0.00414029679422, -0.0216401454975,
-           0.999557249008, 0.0149672133247, 0.025715529948,  -0.064676986768,
-           -0.0257744366974, 0.00375618835797, 0.999660727178, 0.00981073058949,
-           0, 0, 0, 1]
+   data: [-0.0992492801215227787, -0.00493760490472488, 0.99505035071254766081, 0.022537727233763266,
+          -0.99480102186948882349, -0.022435194415870189, -0.099335738477863779, -0.03144448545437947174,
+          0.022814628701338697729, -0.99973610623470357917, -0.0026852575096465855212, 0.023451053567603501105,
+          0.0, 0.0, 0.0, 1.0]
+
 
 body_T_cam1: !!opencv-matrix
    rows: 4
    cols: 4
    dt: d
-   data: [0.0125552670891, -0.999755099723, 0.0182237714554, -0.0198435579556,
-           0.999598781151, 0.0130119051815, 0.0251588363115, 0.0453689425024,
-          -0.0253898008918, 0.0179005838253, 0.999517347078, 0.00786212447038,
-          0, 0, 0, 1]
+   data: [-0.1312414709983456611, -0.056964223770890419, 0.98971246001066870539, 0.03011832589536625538,
+          -0.98958181782386936339, -0.0520803323016395222, -0.13422170025653975898, 0.062868416852542134293,
+          0.0591903887687516187, -0.9970169086818589588, -0.049535660688773585011, 0.019312224189091709608,
+          0.0, 0.0, 0.0, 1.0]
 
 #Multiple thread support
 multiple_thread: 1
 
 #feature traker paprameters
-max_cnt: 200            # max feature number in feature tracking
+max_cnt: 130            #130 for handheld # max feature number in feature tracking
 min_dist: 30            # min distance between two features 
 freq: 10                # frequence (Hz) of publish tracking result. At least 10Hz for good estimation. If set 0, the frequence will be same as raw image 
 F_threshold: 1.0        # ransac threshold (pixel)
@@ -55,24 +60,24 @@ max_num_iterations: 30   # max solver itrations, to guarantee real time
 keyframe_parallax: 10.0 # keyframe selection threshold (pixel)
 
 #imu parameters       The more accurate parameters you provide, the better performance
-#imu parameters       The more accurate parameters you provide, the better performance
-# acc_n: 0.08          # accelerometer measurement noise standard deviation. #0.2   0.04
-# gyr_n: 0.005         # gyroscope measurement noise standard deviation.     #0.05  0.004
-# acc_w: 0.0005         # accelerometer bias random work noise standard deviation.  #0.02
-# gyr_w: 5.0e-5       # gyroscope bias random work noise standard deviation.     #4.0e-5
+# acc_n: 0.2          # accelerometer measurement noise standard deviation. 
+# gyr_n: 0.05         # gyroscope measurement noise standard deviation.     
+# acc_w: 0.02         # accelerometer bias random work noise standard deviation.  
+# gyr_w: 4.0e-5       # gyroscope bias random work noise standard deviation.     
 # g_norm: 9.81007     # gravity magnitude
+
 acc_n: 0.1          # accelerometer measurement noise standard deviation. 
-gyr_n: 0.01         # gyroscope measurement noise standard deviation.     
+gyr_n: 0.001         # 0.001 for handheld indoor gyroscope measurement noise standard deviation.     
 acc_w: 0.001        # accelerometer bias random work noise standard deviation.  
 gyr_w: 0.0001       # gyroscope bias random work noise standard deviation.     
 g_norm: 9.81007     # gravity magnitude
 
 #unsynchronization parameters
-estimate_td: 1                      # online estimate time offset between camera and imu
+estimate_td: 0                        # online estimate time offset between camera and imu
 weight_td: 0
-omn_td : 1
-td_cov: 1.0e+05                        #1.2e+05 td = - ;2.0e+05 td = +0.01
-td: 0.0                             # initial value of time offset. unit: s. readed image clock + td = real image clock (IMU clock)
+# td_cov: 5.0e+5                    #AirSim_Car_10m_s_stereo_turn_2
+td_cov: 2.5e+02                     #5.0e+05 indoor ;5.0e+02 outdoor 3; 2.5e+02 outdoor2
+td: 0.0                           # initial value of time offset. unit: s. readed image clock + td = real image clock (IMU clock)
 
 #loop closure parameters
 load_previous_pose_graph: 0        # load and reuse previous pose graph; load from 'pose_graph_save_path'

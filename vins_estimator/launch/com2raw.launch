@@ -1,0 +1,4 @@
+<launch>
+<node pkg="image_transport" type="republish" name="republish" args="compressed in:=/HKRCams/Cam0 raw out:=/HKRCams/Cam0" output="screen" respawn="true"/>
+<node pkg="image_transport" type="republish" name="republish1" args="compressed in:=/HKRCams/Cam1 raw out:=/HKRCams/Cam1" output="screen" respawn="true"/>
+</launch>

@@ -186,7 +186,7 @@ void Estimator::inputImage(double t, const cv::Mat &_img, const cv::Mat &_img1)
     
     if(MULTIPLE_THREAD)  
     {     
-        // if(inputImageCnt % 2 == 0)
+        // if(inputImageCnt % 4 == 0)
         // {
             mBuf.lock();
             featureBuf.push(make_pair(t, featureFrame));
@@ -1125,7 +1125,7 @@ void Estimator::optimization()
         
         Vector3d pts_i = it_per_id.feature_per_frame[0].point;
        
-        if(WEIGHT_TD && td_flag)
+        if(WEIGHT_TD && td_flag && OMN_TD)
         {
             int new_flag = 0;
             if(it_per_id.feature_per_frame[0].velocity.norm() == 0)
@@ -1198,7 +1198,7 @@ void Estimator::optimization()
                         // it_per_id.feature_per_frame[it_per_id.endFrame() - it_per_id.start_frame - i - 1].velocity = Vector2d(z[0]* (vx_max - vx_min),z[1] * (vy_max - vy_min));
                         if(it_per_id.endFrame() - it_per_id.start_frame - i - 1 == 1)
                             diff = abs(z[0]-label[0]) / abs(label[0]) + abs(z[1]-label[1]) / abs(label[1]);
-                        if(it_per_id.endFrame() - it_per_id.start_frame - i - 1 == 0 && diff < 0.055)
+                        if(it_per_id.endFrame() - it_per_id.start_frame - i - 1 == 0 && diff < 0.05) // 0.055
                         {
                             it_per_id.feature_per_frame[0].velocity = Vector2d(z[0]* (vx_max - vx_min) + vx_min,z[1] * (vy_max - vy_min) + vy_min);
                             cout << "pre_valid_points: "  << ++predict_points << std::endl;
@@ -1246,11 +1246,14 @@ void Estimator::optimization()
             }
             else{
                 valid_points++;
-                if(it_per_id.estimated_depth < 50 && it_per_id.estimated_depth > 5)
+                if(it_per_id.estimated_depth < 50 && it_per_id.estimated_depth > 0.1)
                 {
                     valid_3d_points[it_per_id.start_frame].push_back(Vector3d(it_per_id.feature_per_frame[0].uv.x(),it_per_id.feature_per_frame[0].uv.y(),it_per_id.estimated_depth));
                     valid_2d_velocity[it_per_id.start_frame].push_back(it_per_id.feature_per_frame[0].velocity);
                 }
+                // else{
+                //     new_flag = 1;
+                // }
                 // cout << "frame " << it_per_id.start_frame << " valid_cnt " << valid_3d_points[it_per_id.start_frame].size() << endl;
                 // cout << "valid cnt: " << valid_points << endl;
             }
@@ -1443,7 +1446,7 @@ void Estimator::optimization()
         // double init_td_val = para_Td[0][0];
         td_buf.push_back(init_td);
 
-        if(td_buf.size() > 4)
+        if(td_buf.size() > 4) // 4 / 10
         {
             vector<double *> trainSet;
             vector<double *> labelSet;
@@ -1493,7 +1496,7 @@ void Estimator::optimization()
                 free(test);
             }
             pre_td = para_Td[0][0];
-            if(td_buf.size() > 4)
+            if(td_buf.size() > 4) // 4 / 30
                 td_buf.erase(td_buf.begin());
             TdFactor *f_td_lstm = new TdFactor(init_td, /*init_td_val*/ + predicted_td);
             problem.AddResidualBlock(f_td_lstm, loss_function, para_Td[0]);
