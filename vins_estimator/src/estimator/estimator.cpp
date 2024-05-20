@@ -1092,14 +1092,21 @@ void Estimator::optimization()
     int pre_start_frame = -10;
     
 
-    Dim in = {3, 4}; //first layer: 8 input neurons and 5 neurons in the hidden layer
-    Dim out = {4, 2}; //second layer: 5 neurons in the hidden layer and 1 output neuron
+    Dim in = {3, 5}; //first layer: 8 input neurons and 5 neurons in the hidden layer
+    Dim out = {5, 2}; //second layer: 5 neurons in the hidden layer and 1 output neuron
     NeuralNet *ann = create_net(in, out); //initialize a 8-5-1 neural network
     // add_hidden_layer(ann, 20); //add another hidden layer
     // add_hidden_layer(ann, 10); //add another hidden layer
     // add_hidden_layer(ann, 10); //add another hidden layer
     // add_hidden_layer(ann, 4); //add another hidden layer
-            
+
+
+    static double t_ITS = 0.0;
+    static int cnt_ITS = 0;
+    static double t_F2F = 0.0;
+    static int cnt_F2F = 0;
+    static double t_TPN = 0.0;   
+    static int cnt_TPN = 0;
 
     for (auto &it_per_id : f_manager.feature)
     {
@@ -1130,6 +1137,7 @@ void Estimator::optimization()
             int new_flag = 0;
             if(it_per_id.feature_per_frame[0].velocity.norm() == 0)
             {
+                TicToc t_ITS_tic;
                 ++new_points;
                 // cout << "new_points: "  << ++new_points << std::endl;
                 // continue;
@@ -1243,6 +1251,9 @@ void Estimator::optimization()
                 // }
                 trainSet.clear();
                 labelSet.clear();
+                // printf("ITS costs: %f \n", t_ITS_tic.toc());
+                t_ITS += t_ITS_tic.toc();
+                cnt_ITS++;
             }
             else{
                 valid_points++;
@@ -1263,9 +1274,10 @@ void Estimator::optimization()
             // {
                 if(valid_3d_points[it_per_id.start_frame].size() > 35 && new_flag)
                 {
+                    TicToc t_F2F_tic;
                     pre_start_frame = it_per_id.start_frame;
-                    Dim in = {3, 4}; //first layer: 8 input neurons and 5 neurons in the hidden layer
-                    Dim out = {4, 2}; //second layer: 5 neurons in the hidden layer and 1 output neuron
+                    Dim in = {3, 5}; //first layer: 8 input neurons and 5 neurons in the hidden layer
+                    Dim out = {5, 2}; //second layer: 5 neurons in the hidden layer and 1 output neuron
                     int n_epoch = 251; //number of learning epochs
                     // float eta = 0.01; //learnig rate
                     Dim train_dim = {valid_3d_points[it_per_id.start_frame].size(), 3}; //training data dimension
@@ -1356,10 +1368,11 @@ void Estimator::optimization()
                 // /* creating the neural net */
                 // NeuralNet *ann = create_net(in, out); //initialize a 8-5-1 neural network
                 // add_hidden_layer(ann, 5); //add another hidden layer
+                t_F2F += t_F2F_tic.toc();
+                cnt_F2F++;
             }
-            new_3d_points[it_per_id.start_frame].clear();
+            new_3d_points[it_per_id.start_frame].clear();            
         }
-
         
 
         for (auto &it_per_frame : it_per_id.feature_per_frame)
@@ -1442,6 +1455,7 @@ void Estimator::optimization()
     window_index++;
     if(WEIGHT_TD && td_flag)
     {
+        TicToc t_TPN_tic;
         double init_td = para_Td[0][0] /*- pre_td */;
         // double init_td_val = para_Td[0][0];
         td_buf.push_back(init_td);
@@ -1504,6 +1518,8 @@ void Estimator::optimization()
             trainSet.clear();
             labelSet.clear();
         }
+        t_TPN += t_TPN_tic.toc();
+        cnt_TPN++;
     }
     ROS_DEBUG("visual measurement count: %d", f_m_cnt);
     //printf("prepare for ceres: %f \n", t_prepare.toc());
@@ -1527,6 +1543,13 @@ void Estimator::optimization()
     cout << summary.BriefReport() << endl;
     ROS_DEBUG("Iterations : %d", static_cast<int>(summary.iterations.size()));
     printf("solver costs: %f \n", t_solver.toc());
+
+    if(cnt_ITS > 0)
+        printf("ITS costs: %f \n", t_ITS / cnt_ITS);
+    if(cnt_F2F > 0)
+        printf("F2F costs: %f \n", t_F2F / cnt_F2F);
+    if(cnt_TPN > 0)
+        printf("TPN costs: %f \n", t_TPN / cnt_TPN);
 
     double2vector();
     //printf("frame_count: %d \n", frame_count);

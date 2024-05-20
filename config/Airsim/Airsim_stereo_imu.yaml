@@ -78,7 +78,7 @@ weight_td: 1
 omn_td : 1
 # td_cov: 5.0e+5                    #AirSim_Car_10m_s_stereo_turn_2
 td_cov: 1.0e+05                     #AirSim_Car_10m_s_stereo_turn 3.0e+05 -0.02 10.0e+05 -+0.015
-td: 0.015                           # initial value of time offset. unit: s. readed image clock + td = real image clock (IMU clock)
+td: 0.0                           # initial value of time offset. unit: s. readed image clock + td = real image clock (IMU clock)
 
 #loop closure parameters
 load_previous_pose_graph: 0        # load and reuse previous pose graph; load from 'pose_graph_save_path'
