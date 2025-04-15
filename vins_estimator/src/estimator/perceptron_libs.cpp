@@ -157,7 +157,7 @@ void train_net(NeuralNet *ann, float **X, float **y, float *J, float *acc, Dim d
     float *delta_second_layer = allocate_float_1d(ann->output->dim.h);
     clock_t start, end;
     start = clock();
-    float lr = 2;
+    float lr = 0.5;
 
     for (int step = 0; step < n_epoch; ++step) {
         float sum_err = 0;
@@ -196,6 +196,8 @@ void train_net(NeuralNet *ann, float **X, float **y, float *J, float *acc, Dim d
 
         if (step % 100 == 0)
             printf("Epoch: %d   Error: %0.3f \n", step, J[step]);
+        // if (sum_err / dim.h < 1e-5)
+        //     break;
     }
 
     free_float_1d(delta_second_layer);
