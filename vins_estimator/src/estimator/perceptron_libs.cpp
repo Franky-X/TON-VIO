@@ -157,7 +157,7 @@ void train_net(NeuralNet *ann, float **X, float **y, float *J, float *acc, Dim d
     float *delta_second_layer = allocate_float_1d(ann->output->dim.h);
     clock_t start, end;
     start = clock();
-    float lr = 0.5;
+    float lr = 0.7;
 
     for (int step = 0; step < n_epoch; ++step) {
         float sum_err = 0;

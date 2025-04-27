@@ -73,10 +73,11 @@ gyr_w: 0.0001       # gyroscope bias random work noise standard deviation.
 g_norm: 9.81007     # gravity magnitude
 
 #unsynchronization parameters
-estimate_td: 0                        # online estimate time offset between camera and imu
-weight_td: 0
-# td_cov: 5.0e+5                    #AirSim_Car_10m_s_stereo_turn_2
-td_cov: 2.5e+02                     #5.0e+05 indoor ;5.0e+02 outdoor 3; 2.5e+02 outdoor2
+estimate_td: 1                      # online estimate time offset between camera and imu
+weight_td: 1
+omn_td : 1
+tpn_td: 1
+td_cov: 5.0e+02                     #5.0e+05 indoor ;5.0e+02 outdoor 3; 2.5e+02 outdoor2
 td: 0.0                           # initial value of time offset. unit: s. readed image clock + td = real image clock (IMU clock)
 
 #loop closure parameters

@@ -1453,7 +1453,7 @@ void Estimator::optimization()
         }
     }
     window_index++;
-    if(WEIGHT_TD && td_flag)
+    if(WEIGHT_TD && td_flag && TPN_TD)
     {
         TicToc t_TPN_tic;
         double init_td = para_Td[0][0] /*- pre_td */;

@@ -71,7 +71,8 @@ g_norm: 9.81007     # gravity magnitude
 estimate_td: 1                      # online estimate time offset between camera and imu
 weight_td: 1
 omn_td : 1
-td_cov: 1.0e+05                        #1.2e+05 td = - ;2.0e+05 td = +0.01
+tpn_td: 1
+td_cov: 1.5e+05                        # 1.2e+05 td = - ;2.0e+05 td = +0.01
 td: 0.0                             # initial value of time offset. unit: s. readed image clock + td = real image clock (IMU clock)
 
 #loop closure parameters

@@ -48,6 +48,7 @@ extern double TD;
 extern int ESTIMATE_TD;
 extern int WEIGHT_TD;
 extern int OMN_TD;
+extern int TPN_TD;
 extern int TD_COV;
 extern int ROLLING_SHUTTER;
 extern int ROW, COL;
