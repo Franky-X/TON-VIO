@@ -1,5 +1,7 @@
-# VINS-Fusion
-## An optimization-based multi-sensor state estimator
+# TON-VIO
+
+Naive Verision of Codes for paper "TON-VIO: Online Time Offset Modeling Networks for Robust Temporal Alignment in High Dynamic Motion VIO". The usage will be released after the acceptance.
+<!-- ## An optimization-based multi-sensor state estimator
 
 <img src="https://github.com/HKUST-Aerial-Robotics/VINS-Fusion/blob/master/support_files/image/vins_logo.png" width = 55% height = 55% div align=left />
 <img src="https://github.com/HKUST-Aerial-Robotics/VINS-Fusion/blob/master/support_files/image/kitti.png" width = 34% height = 34% div align=center />
@@ -121,9 +123,9 @@ Green path is VIO odometry; red path is odometry under visual loop closure.
     rosbag play YOUR_DATASET_FOLDER/car.bag
 ```
 
-<img src="https://github.com/HKUST-Aerial-Robotics/VINS-Fusion/blob/master/support_files/image/car_gif.gif" width = 430 height = 240  />
+<img src="https://github.com/HKUST-Aerial-Robotics/VINS-Fusion/blob/master/support_files/image/car_gif.gif" width = 430 height = 240  /> -->
 
-
+<!-- 
 ## 6. Run with your devices 
 VIO is not only a software algorithm, it heavily relies on hardware quality. For beginners, we recommend you to run VIO with professional equipment, which contains global shutter cameras and hardware synchronization.
 
@@ -173,4 +175,4 @@ The source code is released under [GPLv3](http://www.gnu.org/licenses/) license.
 
 We are still working on improving the code reliability. For any technical issues, please contact Tong Qin <qintonguavATgmail.com>.
 
-For commercial inquiries, please contact Shaojie Shen <eeshaojieATust.hk>.
+For commercial inquiries, please contact Shaojie Shen <eeshaojieATust.hk>. -->
